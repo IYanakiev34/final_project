@@ -63,7 +63,7 @@ export default function Gallery(props) {
                     <div className="input-group relative flex flex-wrap items-stretch w-full mb-4">
                         <input
                             type="search"
-                            class="form-control relative flex-auto min-w-0 block px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                            className="form-control relative flex-auto min-w-0 block px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="button-addon3"
@@ -85,6 +85,7 @@ export default function Gallery(props) {
             <div className="grid grid-cols-3 grid-rows-auto gap-2">
                 {imageData.map((image) => (
                     <Im
+                        key={image.url}
                         src={image.download}
                         alt="Pic"
                         width={300}
