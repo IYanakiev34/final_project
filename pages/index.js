@@ -43,7 +43,10 @@ export default function Home() {
         } else if (result == 429) {
             alert("Too many requests");
         } else {
-            router.push("http://localhost:3000/images/" + result.id);
+            router.push(
+                "https://final-project-iyanakiev34.vercel.app/images/" +
+                    result.id
+            );
         }
     };
 
