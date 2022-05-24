@@ -37,17 +37,6 @@ export default function Navbar() {
                                     Gallery
                                 </a>
                             </Link>
-                            <Link href="/images">
-                                <a
-                                    className={`py-4 px-2 ${
-                                        router.pathname == "/images"
-                                            ? "text-blue-500 border-b-4 border-blue-500"
-                                            : ""
-                                    } text-gray-500 hover:text-blue-500 transition duration-300 font-semibold `}
-                                >
-                                    Get Image
-                                </a>
-                            </Link>
                         </div>
                     </div>
                 </div>
