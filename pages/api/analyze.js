@@ -1,6 +1,7 @@
 import got from "got";
 import axios from "axios";
 import rateLimit from "../../utils/rate-limit";
+const probe = require("probe-image-size");
 
 import {
     doc,
@@ -65,6 +66,19 @@ const getBufferFromImage = async (imageUrl) => {
     return buffer;
 };
 
+/**
+ * Method to return the image size of a valid url
+ * @param {The url of the image} imageUrl
+ * @returns
+ */
+const getImageSize = async (imageUrl) => {
+    let result = await probe(imageUrl, {
+        rejectUnauthorized: false,
+    });
+
+    return result;
+};
+
 export default async function handler(req, res) {
     if (req.method == "POST") {
         var sent = false;
@@ -80,9 +94,6 @@ export default async function handler(req, res) {
             "https://api.imagga.com/v2/tags?image_url=" +
             encodeURIComponent(imageUrl);
 
-        // Check if cache  = false
-        // If false send request
-        // If true check if url is in db if in db send cache if not request
         if (cached == "true") {
             // Collection refference
             const picturesRef = collection(db, "pictures");
@@ -132,6 +143,11 @@ export default async function handler(req, res) {
                         "image/" + Math.floor(Math.random() * (10000 - 0) + 0)
                     );
 
+                    // Get Image size
+                    const imageSize = await getImageSize(imageUrl);
+                    const width = imageSize.width;
+                    const height = imageSize.height;
+
                     await uploadString(storageRef, buffer, "base64");
 
                     // get dodnload link
@@ -144,6 +160,8 @@ export default async function handler(req, res) {
                         tags: myTags,
                         confidence: confidence,
                         createdAt: serverTimestamp(),
+                        width: width,
+                        height: height,
                     });
 
                     // get document ID
