@@ -89,7 +89,7 @@ export default function Gallery(props) {
                         key={image.url}
                         src={image.download}
                         alt="Pic"
-                        className="object-scale-down"
+                        className="object-scale-down hover:scale-90 duration-300 ease-in-out rounded shadow-lg hover:shadow-2xl shadow-blue-500/50 hover:shadow-blue-500"
                         onClick={() => goToImage(image.id)}
                     ></img>
                 ))}
