@@ -3,8 +3,8 @@ import axios from "axios";
 import { useRouter } from "next/router";
 
 // Make them into env variables
-const apiKey = "acc_ed6512b53a1d11a";
-const apiSecret = "6c8da22c1cebed8b11000f41ce006cd5";
+const apiKey = process.env.API_KEY;
+const apiSecret = process.env.API_SECRET;
 
 // Get the tags of the image sent
 const getTags = async (url, cache) => {
