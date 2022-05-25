@@ -90,6 +90,8 @@ export default async function handler(req, res) {
         // Prepare image url
         const imageUrl = req.body.url;
 
+        var sentFromCache = false;
+
         const url =
             "https://api.imagga.com/v2/tags?image_url=" +
             encodeURIComponent(imageUrl);
@@ -110,10 +112,12 @@ export default async function handler(req, res) {
                     if (d.data()) {
                         const data = d.data();
                         res.json({ tags: data.tags, id: d.id });
+                        sentFromCache = true;
                     }
                 });
             }
-        } else {
+        }
+        if (!sentFromCache) {
             try {
                 // Throtliing of the request
                 await limiter.check(res, 5, "CACHE_TOKEN"); // 5 requests per minute
