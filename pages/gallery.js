@@ -59,7 +59,7 @@ export default function Gallery(props) {
     };
     return (
         <>
-            <div className="flex justify-center">
+            <div className="flex justify-center mt-3">
                 <div className="mb-3 xl:w-96">
                     <div className="input-group relative flex flex-wrap items-stretch w-full mb-4">
                         <input
