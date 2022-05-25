@@ -3,12 +3,15 @@ import axios from "axios";
 import rateLimit from "../../utils/rate-limit";
 
 import {
+    doc,
     addDoc,
     collection,
     serverTimestamp,
     getDocs,
     query,
     where,
+    updateDoc,
+    increment,
 } from "firebase/firestore";
 import { ref, uploadString, getDownloadURL } from "firebase/storage";
 import { db, storage } from "../../lib/firebase";
@@ -18,8 +21,53 @@ const limiter = rateLimit({
     uniqueTokenPerInterval: 500, // Max 500 users per second
 });
 
+/**
+ * Increment the usage of the Imagga API by one
+ */
+const incrementUsage = async () => {
+    const imaggaIdDoc = "9HC6eGwgjMTglAnRsQwS";
+    const refDoc = doc(db, "usage", imaggaIdDoc);
+    await updateDoc(refDoc, {
+        usage: increment(1),
+    });
+};
+
+/**
+ * Get the tags and the confidence into different arrays to pass to the databse
+ * @param {The response body of the ISC} data
+ * @returns { confidence, tags} arrays
+ */
+const getTags = (data) => {
+    var myTags = [];
+    var confidence = [];
+    var i = 0;
+    while (data[i].confidence >= 70) {
+        myTags.push(data[i].tag.en);
+        confidence.push(data[i].confidence);
+        i++;
+    }
+
+    return { myTags, confidence };
+};
+
+/**
+ * Convert the image into array buffer and encode in base64
+ * @param {The image url of the picture being analyzed} imageUrl
+ * @returns buffer encode in base 64
+ */
+const getBufferFromImage = async (imageUrl) => {
+    var buffer;
+    const image = await axios
+        .get(imageUrl, { responseType: "arraybuffer" })
+        .then((response) => {
+            buffer = Buffer.from(response.data).toString("base64");
+        });
+    return buffer;
+};
+
 export default async function handler(req, res) {
     if (req.method == "POST") {
+        var sent = false;
         // Get body from query
         const username = req.body.username;
         const password = req.body.password;
@@ -32,23 +80,25 @@ export default async function handler(req, res) {
             "https://api.imagga.com/v2/tags?image_url=" +
             encodeURIComponent(imageUrl);
 
-        var sentFromCache = false;
-
         // Check if cache  = false
         // If false send request
         // If true check if url is in db if in db send cache if not request
         if (cached == "true") {
-            // update image with the link
+            // Collection refference
             const picturesRef = collection(db, "pictures");
+
+            //Query for the document
             const q = query(picturesRef, where("url", "==", imageUrl));
+
+            // Get the data
             const document = await getDocs(q);
+
+            // If exists send it
             if (document.docs.length > 0) {
                 document.forEach((d) => {
-                    console.log(d.data());
                     if (d.data()) {
                         const data = d.data();
                         res.json({ tags: data.tags, id: d.id });
-                        sentFromCache = true;
                     }
                 });
             }
@@ -57,46 +107,37 @@ export default async function handler(req, res) {
                 // Throtliing of the request
                 await limiter.check(res, 5, "CACHE_TOKEN"); // 5 requests per minute
                 try {
-                    console.log("Sending request");
                     // anayze image
                     const response = await got(url, {
                         username: username,
                         password: password,
                     });
+
+                    // Get the JSON data
                     const result = JSON.parse(response.body);
 
-                    //get tags
+                    //Get tags from data
                     const data = result.result.tags;
-                    var myTags = [];
-                    var confidence = [];
-                    var i = 0;
-                    while (data[i].confidence >= 70) {
-                        myTags.push(data[i].tag.en);
-                        confidence.push(data[i].confidence);
-                        i++;
-                    }
 
-                    // fetch image from the url provided
-                    var buffer;
-                    const image = await axios
-                        .get(imageUrl, { responseType: "arraybuffer" })
-                        .then((response) => {
-                            buffer = Buffer.from(response.data).toString(
-                                "base64"
-                            );
-                        });
+                    const resultTags = getTags(data);
+                    const myTags = resultTags.myTags;
+                    const confidence = resultTags.confidence;
 
-                    // store the blob in the firebase storage
+                    // Get the base64 array buffer from image url
+                    var buffer = await getBufferFromImage(imageUrl);
+
+                    // store the buffer in the cloud storage
                     const storageRef = ref(
                         storage,
                         "image/" + Math.floor(Math.random() * (10000 - 0) + 0)
                     );
+
                     await uploadString(storageRef, buffer, "base64");
 
                     // get dodnload link
                     const link = await getDownloadURL(storageRef);
 
-                    // add doc
+                    // add the document to the cloud database
                     await addDoc(collection(db, "pictures"), {
                         url: imageUrl,
                         download: link,
@@ -120,21 +161,27 @@ export default async function handler(req, res) {
                         }
                     });
 
+                    await incrementUsage();
+
+                    // Send the data of the document with its ID for redirecting
                     res.status(200).json({
                         tags: data,
                         id: docId,
                     });
                 } catch (error) {
+                    // Error from analyzer => probably wrong URL
                     res.status(400).json({
                         error: error,
                         message: "Error, entered a wrong URL",
                     });
                 }
             } catch {
+                // Throtlling error exceeded requests
                 res.status(429).json({ error: "Rate limit exceeded" });
             }
         }
     } else {
-        res.status(400).json({ message: "Probably wrong method", status: 400 });
+        // Method error
+        res.status(400).json({ message: "ALLOW POST", status: 400 });
     }
 }

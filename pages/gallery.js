@@ -1,6 +1,5 @@
 import { postToJSON, db } from "../lib/firebase";
 import { useRouter } from "next/router";
-import Im from "next/image";
 import { collection, getDocs } from "firebase/firestore";
 import { useState } from "react";
 import axios from "axios";
@@ -11,15 +10,13 @@ export default function Gallery(props) {
     const [imageData, setImageData] = useState(props.data);
 
     const goToImage = (id) => {
-        router.push(
-            "https://final-project-iyanakiev34.vercel.app/images/" + id
-        );
+        router.push("http://localhost:3000/images/" + id);
     };
 
     const getByTags = async () => {
         const tagsToSearch = tags.split(" ");
         console.log(tagsToSearch);
-        var url = "https://final-project-iyanakiev34.vercel.app/api/images?";
+        var url = "http://localhost:3000/api/images?";
         for (var i = 0; i < tagsToSearch.length; i++) {
             if (i == tagsToSearch.length - 1) {
                 url += "tag=" + tagsToSearch[i];
@@ -65,7 +62,7 @@ export default function Gallery(props) {
                     <div className="input-group relative flex flex-wrap items-stretch w-full mb-4">
                         <input
                             type="search"
-                            className="form-control relative flex-auto min-w-0 block px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
+                            class="form-control relative flex-auto min-w-0 block px-3 py-1.5 text-base font-normal text-gray-700 bg-white bg-clip-padding border border-solid border-gray-300 rounded transition ease-in-out m-0 focus:text-gray-700 focus:bg-white focus:border-blue-600 focus:outline-none"
                             placeholder="Search"
                             aria-label="Search"
                             aria-describedby="button-addon3"
@@ -86,14 +83,12 @@ export default function Gallery(props) {
             </div>
             <div className="grid grid-cols-3 grid-rows-auto gap-2">
                 {imageData.map((image) => (
-                    <Im
-                        key={image.url}
+                    <img
                         src={image.download}
                         alt="Pic"
-                        width={300}
-                        height={300}
+                        className="object-scale-down"
                         onClick={() => goToImage(image.id)}
-                    ></Im>
+                    ></img>
                 ))}
             </div>
         </>

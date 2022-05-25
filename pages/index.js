@@ -1,13 +1,19 @@
 import { useState } from "react";
 import axios from "axios";
 import { useRouter } from "next/router";
+
 // Make them into env variables
 const apiKey = "acc_ed6512b53a1d11a";
 const apiSecret = "6c8da22c1cebed8b11000f41ce006cd5";
 
+// Get the tags of the image sent
 const getTags = async (url, cache) => {
     try {
+        // Results
         var res;
+
+        // Send request to the backend which sends request to the analyzer
+        // result is either the tags or an error
         await axios
             .post(
                 "api/analyze",
@@ -38,15 +44,15 @@ export default function Home() {
 
     const sendImageForTag = async (cached) => {
         const result = await getTags(url, cached);
+
+        // If error alert the user else get the tags and redirect
         if (result == 400) {
             alert("Wrong URL");
         } else if (result == 429) {
             alert("Too many requests");
         } else {
-            router.push(
-                "https://final-project-iyanakiev34.vercel.app/images/" +
-                    result.id
-            );
+            // Redirect
+            router.push("http://localhost:3000/images/" + result.id);
         }
     };
 

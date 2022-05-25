@@ -1,19 +1,22 @@
 import { collection, query, getDocs, where } from "firebase/firestore";
 import { db } from "../../../lib/firebase";
 
-// Get image by id
+// Get all images in the database by tags
 export default async function handler(req, res) {
+    // Get tags array
     var tags = req.query.tag;
 
-    console.log(tags);
-
     if (req.method == "GET") {
+        // Query all documents with tags
         const q = query(
             collection(db, "pictures"),
             where("tags", "array-contains-any", tags)
         );
+
+        // Get the documents
         const documents = await getDocs(q);
 
+        // Send the pictures
         var relevantPictures = [];
         if (documents.docs.length > 0) {
             documents.forEach((d) => {
