@@ -84,6 +84,7 @@ export default function Gallery(props) {
             <div className="grid grid-cols-3 grid-rows-auto gap-2">
                 {imageData.map((image) => (
                     <img
+                        key={image.url}
                         src={image.download}
                         alt="Pic"
                         className="object-scale-down"
