@@ -22,19 +22,19 @@ export default function Usage(props) {
                                         scope="col"
                                         className="text-sm font-medium text-gray-900 px-6 py-4 text-left"
                                     >
-                                        First
+                                        Service Name
                                     </th>
                                     <th
                                         scope="col"
                                         className="text-sm font-medium text-gray-900 px-6 py-4 text-left"
                                     >
-                                        Last
+                                        Requests Made
                                     </th>
                                     <th
                                         scope="col"
                                         className="text-sm font-medium text-gray-900 px-6 py-4 text-left"
                                     >
-                                        Handle
+                                        Limit Per Month
                                     </th>
                                 </tr>
                             </thead>
