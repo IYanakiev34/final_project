@@ -10,13 +10,15 @@ export default function Gallery(props) {
     const [imageData, setImageData] = useState(props.data);
 
     const goToImage = (id) => {
-        router.push("http://localhost:3000/images/" + id);
+        router.push(
+            "https://final-project-iyanakiev34.vercel.app/images/" + id
+        );
     };
 
     const getByTags = async () => {
         const tagsToSearch = tags.split(" ");
         console.log(tagsToSearch);
-        var url = "http://localhost:3000/api/images?";
+        var url = "https://final-project-iyanakiev34.vercel.app/api/images?";
         for (var i = 0; i < tagsToSearch.length; i++) {
             if (i == tagsToSearch.length - 1) {
                 url += "tag=" + tagsToSearch[i];

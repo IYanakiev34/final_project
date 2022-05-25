@@ -52,7 +52,10 @@ export default function Home() {
             alert("Too many requests");
         } else {
             // Redirect
-            router.push("http://localhost:3000/images/" + result.id);
+            router.push(
+                "https://final-project-iyanakiev34.vercel.app/images/" +
+                    result.id
+            );
         }
     };
 
